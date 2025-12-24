@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
-import { createImageGeneration, getUserImageGenerations, createImageEdit, getUserImageEdits } from "./db";
+import { createImageGeneration, getUserImageGenerations, createImageEdit, getUserImageEdits, getAllInspirations, getInspirationById, createInspiration, updateInspiration, deleteInspiration } from "./db";
 import { generateImageFromPrompt, editImageWithPrompt, validateApiKey } from "./openrouter";
 import { storagePut } from "./storage";
 
@@ -124,6 +124,96 @@ export const appRouter = router({
           console.error("Image upload error:", error);
           throw error;
         }
+      }),
+  }),
+
+  inspirations: router({
+    getAll: publicProcedure
+      .input(
+        z.object({
+          category: z.string().optional(),
+        }).optional()
+      )
+      .query(async ({ input }) => {
+        return await getAllInspirations(input?.category);
+      }),
+
+    getById: publicProcedure
+      .input(
+        z.object({
+          id: z.string().min(1),
+        })
+      )
+      .query(async ({ input }) => {
+        return await getInspirationById(input.id);
+      }),
+
+    create: protectedProcedure
+      .input(
+        z.object({
+          title: z.string().min(1).max(100),
+          prompt: z.string().min(1).max(1000),
+          imageUrl: z.string().url(),
+          imageKey: z.string().optional(),
+          category: z.enum([
+            "fashion",
+            "shoes",
+            "accessories",
+            "home",
+            "electronics",
+            "beauty",
+            "food",
+            "other",
+          ]),
+          tags: z.array(z.string()).optional(),
+          note: z.string().optional(),
+          orderWeight: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const id = await createInspiration(input);
+        return { success: true, id };
+      }),
+
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.string().min(1),
+          title: z.string().min(1).max(100).optional(),
+          prompt: z.string().min(1).max(1000).optional(),
+          imageUrl: z.string().url().optional(),
+          imageKey: z.string().optional(),
+          category: z.enum([
+            "fashion",
+            "shoes",
+            "accessories",
+            "home",
+            "electronics",
+            "beauty",
+            "food",
+            "other",
+          ]).optional(),
+          tags: z.array(z.string()).optional(),
+          note: z.string().optional(),
+          orderWeight: z.string().optional(),
+          isActive: z.boolean().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updateInspiration(id, data);
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(
+        z.object({
+          id: z.string().min(1),
+        })
+      )
+      .mutation(async ({ input }) => {
+        await deleteInspiration(input.id);
+        return { success: true };
       }),
   }),
 });

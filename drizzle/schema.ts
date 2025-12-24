@@ -148,3 +148,38 @@ export const imageEdits = pgTable("imageEdits", {
 
 export type ImageEdit = typeof imageEdits.$inferSelect;
 export type InsertImageEdit = typeof imageEdits.$inferInsert;
+
+/**
+ * Inspiration category enum
+ */
+export const inspirationCategoryEnum = pgEnum("inspiration_category", [
+  "fashion",    // 服装
+  "shoes",      // 鞋类
+  "accessories", // 配饰
+  "home",       // 家居
+  "electronics", // 数码
+  "beauty",     // 美妆
+  "food",       // 食品
+  "other",      // 其他
+]);
+
+/**
+ * Inspirations table - prompt templates with example images
+ */
+export const inspirations = pgTable("inspirations", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(), // 标题
+  prompt: text("prompt").notNull(), // 提示词模板
+  imageUrl: text("imageUrl").notNull(), // 示例图片 URL
+  imageKey: text("imageKey"), // S3 key for reference
+  category: inspirationCategoryEnum("category").notNull(), // 分类
+  tags: text("tags").array(), // 标签数组
+  note: text("note"), // 使用说明/提示
+  orderWeight: text("orderWeight").default("0"), // 排序权重（数字字符串）
+  isActive: boolean("isActive").default(true).notNull(), // 是否启用
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+
+export type Inspiration = typeof inspirations.$inferSelect;
+export type InsertInspiration = typeof inspirations.$inferInsert;

@@ -1,7 +1,7 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertUser, user, imageGenerations, imageEdits } from "../drizzle/schema";
+import { InsertUser, user, imageGenerations, imageEdits, inspirations, InsertInspiration } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -205,3 +205,83 @@ export async function getUserImageEdits(userId: string, limit = 20) {
     .orderBy(desc(imageEdits.createdAt))
     .limit(limit);
 }
+
+/**
+ * Create a new inspiration
+ */
+export async function createInspiration(data: InsertInspiration) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const id = `insp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+  await db.insert(inspirations).values({
+    ...data,
+    id,
+  });
+
+  return id;
+}
+
+/**
+ * Get all active inspirations
+ */
+export async function getAllInspirations(category?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const conditions = [eq(inspirations.isActive, true)];
+
+  if (category) {
+    conditions.push(eq(inspirations.category, category as any));
+  }
+
+  return await db
+    .select()
+    .from(inspirations)
+    .where(and(...conditions))
+    .orderBy(desc(inspirations.orderWeight), desc(inspirations.createdAt));
+}
+
+/**
+ * Get inspiration by id
+ */
+export async function getInspirationById(id: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .select()
+    .from(inspirations)
+    .where(eq(inspirations.id, id))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Update inspiration
+ */
+export async function updateInspiration(id: string, data: Partial<InsertInspiration>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(inspirations)
+    .set(data)
+    .where(eq(inspirations.id, id));
+}
+
+/**
+ * Delete inspiration (soft delete by setting isActive to false)
+ */
+export async function deleteInspiration(id: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(inspirations)
+    .set({ isActive: false })
+    .where(eq(inspirations.id, id));
+}
+

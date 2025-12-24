@@ -1,10 +1,18 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { LOGIN_URL } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Upload, Settings, LogIn, X, Loader2 } from "lucide-react";
+import {
+  Sparkles,
+  Upload,
+  User,
+  LogIn,
+  X,
+  Loader2,
+  ChevronRight,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -24,39 +32,6 @@ const ASPECT_RATIOS = [
   { id: "3:4", label: "3:4" },
   { id: "16:9", label: "16:9" },
   { id: "9:16", label: "9:16" },
-];
-
-const EXAMPLE_IMAGES = [
-  {
-    id: 1,
-    title: "木鱼咖啡时光",
-    subtitle: "文字设计",
-    image: "bg-gradient-to-br from-amber-900 to-amber-700",
-  },
-  {
-    id: 2,
-    title: "覆盖一瞬间香气",
-    subtitle: "中文海报",
-    image: "bg-gradient-to-br from-pink-200 to-pink-100",
-  },
-  {
-    id: 3,
-    title: "双11海报",
-    subtitle: "多图融合",
-    image: "bg-gradient-to-br from-red-400 to-red-300",
-  },
-  {
-    id: 4,
-    title: "清新绿展台",
-    subtitle: "产品展示",
-    image: "bg-gradient-to-br from-green-400 to-green-300",
-  },
-  {
-    id: 5,
-    title: "美食创意",
-    subtitle: "Fresh",
-    image: "bg-gradient-to-br from-yellow-400 to-orange-400",
-  },
 ];
 
 export default function Home() {
@@ -81,6 +56,47 @@ export default function Home() {
   const generateMutation = trpc.images.generate.useMutation();
   const editMutation = trpc.images.edit.useMutation();
 
+  // 获取灵感列表（限制8个）
+  const { data: inspirations } = trpc.inspirations.getAll.useQuery();
+  const displayedInspirations = inspirations?.slice(0, 8) || [];
+  const [note, setNote] = useState<string>("");
+
+  // 从 sessionStorage 读取选中的灵感 prompt
+  useEffect(() => {
+    const selectedPrompt = sessionStorage.getItem(
+      "selected_inspiration_prompt"
+    );
+    if (selectedPrompt) {
+      setPrompt(selectedPrompt);
+      sessionStorage.removeItem("selected_inspiration_prompt");
+      // 滚动到 prompt 输入框
+      setTimeout(() => {
+        document.getElementById("prompt-input")?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    }
+  }, []);
+
+  // 处理点击灵感
+  const handleInspirationClick = (inspiration: {
+    prompt: string;
+    note?: string | null;
+    title: string;
+  }) => {
+    setPrompt(inspiration.prompt);
+
+    setNote(inspiration.note || "");
+
+    setTimeout(() => {
+      document.getElementById("prompt-input")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+  };
+
   // 处理文件选择
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -102,7 +118,7 @@ export default function Home() {
 
     // 创建预览
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       setPreviewUrl(e.target?.result as string);
     };
     reader.readAsDataURL(file);
@@ -124,7 +140,7 @@ export default function Home() {
     setIsUploading(true);
     try {
       const reader = new FileReader();
-      reader.onload = async (e) => {
+      reader.onload = async e => {
         const base64Data = (e.target?.result as string).split(",")[1];
 
         const result = await uploadMutation.mutateAsync({
@@ -242,22 +258,23 @@ export default function Home() {
               onClick={handleSettingsClick}
               className="gap-2"
             >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">设置</span>
+              <User className="w-4 h-4" />
+              {/*<span className="hidden sm:inline">我的</span>*/}
+
+              {!user && !loading && (
+                <Button
+                  size="sm"
+                  onClick={() => navigate(LOGIN_URL)}
+                  className="gap-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">登录</span>
+                </Button>
+              )}
+              {user && (
+                <div className="text-sm text-muted-foreground">{user.name}</div>
+              )}
             </Button>
-            {!user && !loading && (
-              <Button
-                size="sm"
-                onClick={() => navigate(LOGIN_URL)}
-                className="gap-2"
-              >
-                <LogIn className="w-4 h-4" />
-                <span className="hidden sm:inline">登录</span>
-              </Button>
-            )}
-            {user && (
-              <div className="text-sm text-muted-foreground">{user.name}</div>
-            )}
           </div>
         </div>
       </div>
@@ -340,7 +357,7 @@ export default function Home() {
         {/* Categories */}
         <div className="mb-8">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
@@ -357,30 +374,89 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Example Images Grid */}
+        {/* Inspirations Section */}
         <div className="mb-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {EXAMPLE_IMAGES.map((img) => (
-              <div
-                key={img.id}
-                className="group relative rounded-xl overflow-hidden aspect-square cursor-pointer"
-              >
-                <div className={`w-full h-full ${img.image} flex items-end p-3`}>
-                  <div className="text-white">
-                    <div className="font-semibold text-sm">{img.title}</div>
-                    <div className="text-xs opacity-80">{img.subtitle}</div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              创作灵感
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/inspirations")}
+              className="gap-1 text-sm"
+            >
+              查看更多
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* 横向滚动容器 */}
+          <div className="relative -mx-4 px-4">
+            <div className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide">
+              {displayedInspirations.map(inspiration => (
+                <div
+                  key={inspiration.id}
+                  onClick={() => handleInspirationClick(inspiration)}
+                  className="flex-shrink-0 w-[160px] sm:w-[200px] snap-start group cursor-pointer"
+                >
+                  <div className="relative aspect-square rounded-xl overflow-hidden bg-muted">
+                    <img
+                      src={inspiration.imageUrl}
+                      alt={inspiration.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute bottom-0 left-0 right-0 p-3 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                        <div className="font-semibold text-sm line-clamp-1">
+                          {inspiration.title}
+                        </div>
+                        <div className="text-xs opacity-90 line-clamp-2 mt-1">
+                          {inspiration.prompt}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 px-1">
+                    <div className="font-medium text-sm text-foreground line-clamp-1">
+                      {inspiration.title}
+                    </div>
                   </div>
                 </div>
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
+              ))}
+
+              {/* 查看更多卡片 */}
+              <div
+                onClick={() => navigate("/inspirations")}
+                className="flex-shrink-0 w-[160px] sm:w-[200px] snap-start cursor-pointer"
+              >
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-dashed border-primary/30 flex flex-col items-center justify-center gap-2 hover:border-primary/50 hover:bg-primary/15 transition-all">
+                  <ChevronRight className="w-8 h-8 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    查看更多
+                  </span>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
+
+          <style>{`
+            .scrollbar-hide::-webkit-scrollbar {
+              display: none;
+            }
+            .scrollbar-hide {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+          `}</style>
         </div>
 
         {/* Aspect Ratio Selection */}
         <div className="mb-8">
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {ASPECT_RATIOS.map((ratio) => (
+            {ASPECT_RATIOS.map(ratio => (
               <button
                 key={ratio.id}
                 onClick={() => setSelectedAspectRatio(ratio.id)}
@@ -400,31 +476,21 @@ export default function Home() {
         <div className="mb-8 space-y-4">
           {/* API Key Input */}
           <div>
-            <label className="block text-sm font-medium mb-2">
-              OpenRouter API Key
-            </label>
-            <Input
-              type="password"
-              placeholder="sk-or-v1-..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="bg-card border-border"
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              获取地址: <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://openrouter.ai/keys</a>
-            </p>
+            <label className="block text-sm font-medium mb-2">使用提示：</label>
+            <p className="text-xs text-muted-foreground mt-2">{note}</p>
           </div>
 
           {/* Prompt Input */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              商品描述或选择上面的模板
+              请输入描述或选择上面的模板：
             </label>
             <Textarea
+              id="prompt-input"
               placeholder="请输入您的想法或选择上面的模板&#10;例如：白色帆布鞋，简约风格，白色背景，产品摄影..."
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="bg-card border-border min-h-32 resize-none"
+              onChange={e => setPrompt(e.target.value)}
+              className="bg-card border-border min-h-32 resize-none max-h-64"
             />
           </div>
         </div>

@@ -24,7 +24,7 @@ export default function Generate() {
 
   const handleGenerate = async () => {
     if (!apiKey) {
-      toast.error("请先在设置中保存 API Key");
+      toast.error("请先在个人中心保存 API Key");
       return;
     }
 
@@ -135,7 +135,7 @@ export default function Generate() {
             {!apiKey && (
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-xs text-yellow-800">
-                  ⚠️ 未检测到 API Key，请先在设置中保存
+                  ⚠️ 未检测到 API Key，请先在个人中心保存
                 </p>
               </div>
             )}

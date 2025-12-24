@@ -9,6 +9,7 @@ import Generate from "./pages/Generate";
 import Edit from "./pages/Edit";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
+import Inspirations from "./pages/Inspirations";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/edit"} component={Edit} />
       <Route path={"/history"} component={History} />
       <Route path={"/settings"} component={Settings} />
+      <Route path={"/inspirations"} component={Inspirations} />
       <Route path={"/login"} component={Login} />
       <Route path={"/register"} component={Register} />
       <Route path={"/404"} component={NotFound} />

@@ -5,7 +5,7 @@ import { createAuthClient } from "better-auth/client";
  * 用于前端的认证操作（注册、登录、登出等）
  */
 export const authClient = createAuthClient({
-  baseURL: process.env.BETTER_AUTH_BASE_URL ?? "http://localhost:3000", // 生产环境需要替换为实际域名
+  baseURL: import.meta.env.VITE_BETTER_AUTH_BASE_URL ?? "http://localhost:3000", // 生产环境需要替换为实际域名
 });
 
 /**
