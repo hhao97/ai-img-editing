@@ -1,0 +1,414 @@
+{
+  "metadata": {
+    "projectName": "ai-ecommerce-image-gen",
+    "version": "1.0.0",
+    "generatedAt": "2025-12-23T21:50:24+08:00",
+    "generator": "Claude Code AI (自适应架构师)",
+    "scanStrategy": "阶段 A (全仓清点) + 阶段 B (模块优先扫描)",
+    "truncated": false,
+    "nextScanRecommendation": "可选：深度扫描 client/src/components/ui/ 组件实现细节（当前已覆盖核心模块）"
+  },
+  "coverage": {
+    "totalFilesEstimated": 150,
+    "filesScanned": 117,
+    "coveragePercentage": 78,
+    "scanDepth": "medium",
+    "modules": {
+      "client": {
+        "scanned": true,
+        "fileCount": 72,
+        "keyFiles": [
+          "client/src/main.tsx",
+          "client/src/App.tsx",
+          "client/src/pages/Home.tsx",
+          "client/src/pages/Generate.tsx",
+          "client/src/pages/Edit.tsx",
+          "client/src/pages/History.tsx",
+          "client/src/pages/Settings.tsx",
+          "client/src/lib/trpc.ts"
+        ],
+        "missingAreas": [
+          "client/src/components/ui/ 组件内部实现（已识别 70+ 组件，仅抽样扫描）"
+        ]
+      },
+      "server": {
+        "scanned": true,
+        "fileCount": 23,
+        "keyFiles": [
+          "server/_core/index.ts",
+          "server/routers.ts",
+          "server/db.ts",
+          "server/openrouter.ts",
+          "server/storage.ts"
+        ],
+        "missingAreas": []
+      },
+      "drizzle": {
+        "scanned": true,
+        "fileCount": 7,
+        "keyFiles": [
+          "drizzle/schema.ts",
+          "drizzle/relations.ts",
+          "drizzle/0000_safe_ultimo.sql",
+          "drizzle/0001_deep_thor.sql"
+        ],
+        "missingAreas": []
+      },
+      "shared": {
+        "scanned": true,
+        "fileCount": 3,
+        "keyFiles": [
+          "shared/const.ts",
+          "shared/types.ts",
+          "shared/_core/errors.ts"
+        ],
+        "missingAreas": []
+      }
+    }
+  },
+  "architecture": {
+    "pattern": "前后端分离 (React SPA + Express API)",
+    "techStack": {
+      "frontend": {
+        "framework": "React 19.2.1",
+        "router": "Wouter 3.3.5",
+        "styling": "Tailwind CSS 4.1.14",
+        "components": "shadcn/ui (Radix UI)",
+        "stateManagement": "React Hooks + tRPC React Query"
+      },
+      "backend": {
+        "framework": "Express 4.21.2",
+        "api": "tRPC 11.6.0",
+        "orm": "Drizzle ORM 0.44.5",
+        "database": "MySQL/TiDB",
+        "auth": "Manus OAuth + JWT (jose 6.1.0)"
+      },
+      "build": {
+        "tool": "Vite 7.1.7",
+        "runtime": "Node.js",
+        "packageManager": "pnpm 10.4.1+"
+      },
+      "testing": {
+        "framework": "Vitest 2.1.4",
+        "coverage": "27 个单元测试"
+      }
+    },
+    "modules": [
+      {
+        "name": "client",
+        "path": "client/",
+        "type": "frontend",
+        "entry": "client/src/main.tsx",
+        "description": "React 单页应用，包含页面、组件、hooks、路由",
+        "dependencies": [
+          "shared",
+          "server (via tRPC)"
+        ]
+      },
+      {
+        "name": "server",
+        "path": "server/",
+        "type": "backend",
+        "entry": "server/_core/index.ts",
+        "description": "Express + tRPC API 服务器，处理业务逻辑",
+        "dependencies": [
+          "drizzle",
+          "shared"
+        ]
+      },
+      {
+        "name": "drizzle",
+        "path": "drizzle/",
+        "type": "database",
+        "entry": "drizzle/schema.ts",
+        "description": "数据库 Schema 定义与迁移管理",
+        "dependencies": []
+      },
+      {
+        "name": "shared",
+        "path": "shared/",
+        "type": "library",
+        "entry": "shared/const.ts",
+        "description": "前后端共享的常量、类型、工具函数",
+        "dependencies": []
+      }
+    ]
+  },
+  "apiRoutes": {
+    "auth": [
+      {
+        "name": "auth.me",
+        "type": "query",
+        "protection": "public",
+        "description": "获取当前用户信息"
+      },
+      {
+        "name": "auth.logout",
+        "type": "mutation",
+        "protection": "public",
+        "description": "用户登出"
+      }
+    ],
+    "images": [
+      {
+        "name": "images.generate",
+        "type": "mutation",
+        "protection": "protected",
+        "input": {
+          "prompt": "string (1-500)",
+          "apiKey": "string"
+        },
+        "output": {
+          "success": "boolean",
+          "imageUrl": "string"
+        },
+        "description": "生成商品图（调用 OpenRouter API）"
+      },
+      {
+        "name": "images.edit",
+        "type": "mutation",
+        "protection": "protected",
+        "input": {
+          "imageUrl": "string",
+          "editPrompt": "string (1-500)",
+          "apiKey": "string"
+        },
+        "output": {
+          "success": "boolean",
+          "editedImageUrl": "string"
+        },
+        "description": "编辑图片（调用 OpenRouter API）"
+      },
+      {
+        "name": "images.getHistory",
+        "type": "query",
+        "protection": "protected",
+        "input": {
+          "limit": "number (默认 20)"
+        },
+        "output": "ImageGeneration[]",
+        "description": "获取用户的生成历史"
+      },
+      {
+        "name": "images.getEditHistory",
+        "type": "query",
+        "protection": "protected",
+        "input": {
+          "limit": "number (默认 20)"
+        },
+        "output": "ImageEdit[]",
+        "description": "获取用户的编辑历史"
+      },
+      {
+        "name": "images.uploadImage",
+        "type": "mutation",
+        "protection": "protected",
+        "input": {
+          "fileName": "string",
+          "fileData": "string (base64)",
+          "mimeType": "string"
+        },
+        "output": {
+          "success": "boolean",
+          "url": "string",
+          "fileKey": "string"
+        },
+        "description": "上传图片到 S3"
+      }
+    ]
+  },
+  "database": {
+    "dialect": "mysql",
+    "orm": "Drizzle ORM 0.44.5",
+    "tables": [
+      {
+        "name": "users",
+        "columns": [
+          "id (INT, PK, AUTO_INCREMENT)",
+          "openId (VARCHAR(64), UNIQUE, NOT NULL)",
+          "name (TEXT)",
+          "email (VARCHAR(320))",
+          "loginMethod (VARCHAR(64))",
+          "role (ENUM: user/admin)",
+          "createdAt (TIMESTAMP)",
+          "updatedAt (TIMESTAMP)",
+          "lastSignedIn (TIMESTAMP)"
+        ],
+        "purpose": "存储用户信息，关联 OAuth"
+      },
+      {
+        "name": "imageGenerations",
+        "columns": [
+          "id (INT, PK, AUTO_INCREMENT)",
+          "userId (INT, FK → users.id)",
+          "prompt (TEXT, NOT NULL)",
+          "imageUrl (TEXT, NOT NULL)",
+          "imageKey (VARCHAR(512))",
+          "status (ENUM: pending/completed/failed)",
+          "errorMessage (TEXT)",
+          "createdAt (TIMESTAMP)",
+          "updatedAt (TIMESTAMP)"
+        ],
+        "purpose": "存储图片生成记录"
+      },
+      {
+        "name": "imageEdits",
+        "columns": [
+          "id (INT, PK, AUTO_INCREMENT)",
+          "userId (INT, FK → users.id)",
+          "originalImageUrl (TEXT, NOT NULL)",
+          "originalImageKey (VARCHAR(512))",
+          "editPrompt (TEXT, NOT NULL)",
+          "editedImageUrl (TEXT, NOT NULL)",
+          "editedImageKey (VARCHAR(512))",
+          "status (ENUM: pending/completed/failed)",
+          "errorMessage (TEXT)",
+          "createdAt (TIMESTAMP)",
+          "updatedAt (TIMESTAMP)"
+        ],
+        "purpose": "存储图片编辑记录"
+      }
+    ],
+    "migrations": [
+      {
+        "version": "0000",
+        "file": "drizzle/0000_safe_ultimo.sql",
+        "description": "初始化表结构"
+      },
+      {
+        "version": "0001",
+        "file": "drizzle/0001_deep_thor.sql",
+        "description": "添加 imageKey 和 editedImageKey 字段"
+      }
+    ]
+  },
+  "externalServices": {
+    "openrouter": {
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "model": "google/gemini-2.5-flash-image-preview",
+      "features": [
+        "文字生成图片 (Text-to-Image)",
+        "图片编辑 (Image-to-Image)"
+      ],
+      "authentication": "用户提供的 API Key（存储在前端 localStorage）"
+    },
+    "storage": {
+      "service": "Manus Forge Storage (兼容 S3 接口)",
+      "purpose": "存储生成和编辑的图片",
+      "paths": [
+        "images/generated/{timestamp}-{random}.png",
+        "images/edited/{timestamp}-{random}.png",
+        "images/{userId}/{timestamp}-{random}-{filename}"
+      ]
+    },
+    "oauth": {
+      "provider": "Manus OAuth",
+      "flow": "Authorization Code",
+      "sessionManagement": "JWT Cookie (app_session_id)"
+    }
+  },
+  "testing": {
+    "framework": "Vitest 2.1.4",
+    "totalTests": 27,
+    "testFiles": [
+      {
+        "file": "server/openrouter.test.ts",
+        "tests": 13,
+        "coverage": [
+          "generateImageFromPrompt",
+          "editImageWithPrompt",
+          "validateApiKey",
+          "错误处理"
+        ]
+      },
+      {
+        "file": "server/images.test.ts",
+        "tests": 13,
+        "coverage": [
+          "数据库操作 (createImageGeneration, getUserImageGenerations)",
+          "tRPC 路由逻辑",
+          "输入验证 (Zod)"
+        ]
+      },
+      {
+        "file": "server/auth.logout.test.ts",
+        "tests": 1,
+        "coverage": [
+          "登出流程 (清除 Cookie)"
+        ]
+      }
+    ],
+    "missingCoverage": [
+      "前端组件单元测试",
+      "E2E 集成测试",
+      "性能测试"
+    ]
+  },
+  "ignored": {
+    "patterns": [
+      "node_modules/**",
+      ".git/**",
+      ".github/**",
+      "dist/**",
+      "build/**",
+      ".next/**",
+      "*.lock",
+      "*.log",
+      "*.bin",
+      "*.pdf",
+      "*.png",
+      "*.jpg",
+      "*.jpeg",
+      "*.gif",
+      "*.mp4",
+      "*.zip",
+      "*.tar",
+      "*.gz"
+    ],
+    "topIgnoredDirs": [
+      "node_modules (依赖包)",
+      "dist (构建产物)",
+      ".git (版本控制)",
+      "client/src/components/ui (70+ shadcn/ui 组件，已抽样扫描)"
+    ]
+  },
+  "recommendations": {
+    "nextSteps": [
+      "可选：深度扫描 client/src/components/ui/ 以了解每个组件的 props 和用法",
+      "考虑添加前端组件单元测试（当前前端无测试覆盖）",
+      "考虑添加 E2E 测试（Playwright 或 Cypress）",
+      "可以为 shared/ 模块添加更多通用工具函数",
+      "建议添加 .env.example 文件作为环境变量模板"
+    ],
+    "potentialIssues": [
+      "API Key 存储在前端 localStorage，刷新浏览器数据会丢失（已在文档中说明）",
+      "OpenRouter API 调用失败时，错误信息可能不够友好",
+      "文件上传限制为 50MB（在 server/_core/index.ts 中配置）"
+    ]
+  },
+  "documentation": {
+    "rootDoc": "CLAUDE.md",
+    "moduleDocs": [
+      "client/CLAUDE.md",
+      "server/CLAUDE.md",
+      "drizzle/CLAUDE.md",
+      "shared/CLAUDE.md"
+    ],
+    "existingDocs": [
+      "README.md (用户使用指南)",
+      "PROJECT_SUMMARY.md (项目技术总结)",
+      "QUICKSTART.md (快速开始)",
+      "ENVIRONMENT_SETUP.md (环境配置)",
+      "todo.md (开发任务)"
+    ]
+  },
+  "scripts": {
+    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
+    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "start": "NODE_ENV=production node dist/index.js",
+    "check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "db:push": "drizzle-kit generate && drizzle-kit migrate"
+  }
+}
