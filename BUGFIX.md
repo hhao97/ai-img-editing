@@ -50,18 +50,18 @@ pnpm dev
 
 应该看到：
 ```
-Server running on http://localhost:3000/
+Server running on https://ai-img.zeabur.app//
 ```
 
 不应该再看到 `BetterAuthError` 错误。
 
 ### 2. 访问首页（未登录）
-访问 http://localhost:3000
+访问 https://ai-img.zeabur.app/
 
 **预期结果**: 页面正常加载，无错误
 
 ### 3. 测试注册
-访问 http://localhost:3000/register
+访问 https://ai-img.zeabur.app//register
 
 填写信息：
 - 姓名：测试用户
@@ -75,7 +75,7 @@ Server running on http://localhost:3000/
 - 显示用户信息
 
 ### 4. 测试登录
-访问 http://localhost:3000/login
+访问 https://ai-img.zeabur.app//login
 
 使用刚才注册的账号登录。
 

@@ -61,7 +61,7 @@ import App from './App';
 # 在项目根目录运行（会自动启动前端 Vite 开发服务器）
 pnpm dev
 
-# 访问：http://localhost:3000
+# 访问：https://ai-img.zeabur.app/
 ```
 
 ---

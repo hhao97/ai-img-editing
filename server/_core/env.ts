@@ -4,7 +4,8 @@ export const ENV = {
 
   // BetterAuth
   betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? "",
-  betterAuthBaseUrl: process.env.BETTER_AUTH_BASE_URL ?? "http://localhost:3000",
+  betterAuthBaseUrl:
+    process.env.BETTER_AUTH_BASE_URL ?? "https://ai-img.zeabur.app/",
 
   // Supabase
   supabaseUrl: process.env.SUPABASE_URL ?? "",

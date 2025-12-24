@@ -48,7 +48,7 @@ npx drizzle-kit push
 pnpm dev
 ```
 
-访问 http://localhost:3000/register 测试注册。
+访问 https://ai-img.zeabur.app//register 测试注册。
 
 ## 📝 已修改的文件
 

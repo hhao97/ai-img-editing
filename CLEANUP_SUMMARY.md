@@ -65,7 +65,7 @@ SUPABASE_STORAGE_BUCKET=images
 
 # BetterAuth
 BETTER_AUTH_SECRET=FSv02zwVBEIv3IhoWQ34/3/ph2mZUnueS2bugtEfi+A=
-BETTER_AUTH_BASE_URL=http://localhost:3000
+BETTER_AUTH_BASE_URL=https://ai-img.zeabur.app/
 ```
 
 ### 可选配置
@@ -118,7 +118,7 @@ ENABLE_API_LOGGING=true
 ## 下一步
 
 1. 运行 `pnpm dev` 启动应用
-2. 访问 http://localhost:3000/register 注册账户
+2. 访问 https://ai-img.zeabur.app//register 注册账户
 3. 测试图片生成功能
 
 ## 技术栈（清理后）

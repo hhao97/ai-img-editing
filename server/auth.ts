@@ -41,14 +41,11 @@ export const auth = betterAuth({
   },
 
   // 基础配置
-  baseURL: process.env.BETTER_AUTH_BASE_URL || "http://localhost:3000",
+  baseURL: process.env.BETTER_AUTH_BASE_URL || "https://ai-img.zeabur.app/",
   secret: process.env.BETTER_AUTH_SECRET!,
 
   // 信任的域名
-  trustedOrigins: [
-    "http://localhost:3000",
-    "http://localhost:5173",
-  ],
+  trustedOrigins: ["https://ai-img.zeabur.app/", "http://localhost:5173"],
 });
 
 export type Auth = typeof auth;

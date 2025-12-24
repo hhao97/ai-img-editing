@@ -126,7 +126,7 @@ pnpm install
 pnpm dev
 ```
 
-访问 `http://localhost:3000` 即可使用应用。
+访问 `https://ai-img.zeabur.app/` 即可使用应用。
 
 ### 5. 在应用中配置 OpenRouter API Key
 

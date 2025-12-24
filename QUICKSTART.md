@@ -55,7 +55,7 @@ VITE_APP_TITLE=电商AI商品图生成器
 pnpm dev
 ```
 
-访问 `http://localhost:3000`
+访问 `https://ai-img.zeabur.app/`
 
 ### 步骤 5：在应用中配置 OpenRouter API Key
 

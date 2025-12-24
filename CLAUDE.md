@@ -165,7 +165,7 @@ pnpm start
 
 ### 开发流程
 
-1. **本地开发**：`pnpm dev` 启动开发服务器（默认 http://localhost:3000）
+1. **本地开发**：`pnpm dev` 启动开发服务器（默认 https://ai-img.zeabur.app/）
 2. **数据库初始化**：`pnpm db:push` 同步 Schema 到数据库
 3. **修改代码**：前端支持 HMR，后端使用 `tsx watch` 自动重启
 4. **测试**：`pnpm test` 运行单元测试

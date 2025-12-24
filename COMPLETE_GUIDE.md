@@ -71,7 +71,7 @@ pnpm dev
 
 ### 2. 测试首页（未登录）
 
-访问 http://localhost:3000
+访问 https://ai-img.zeabur.app/
 
 **预期结果**：
 - ✅ 页面正常加载
@@ -80,7 +80,7 @@ pnpm dev
 
 ### 3. 测试注册
 
-访问 http://localhost:3000/register
+访问 https://ai-img.zeabur.app//register
 
 填写：
 - 姓名：测试用户
@@ -95,7 +95,7 @@ pnpm dev
 
 ### 4. 测试登录
 
-访问 http://localhost:3000/login
+访问 https://ai-img.zeabur.app//login
 
 使用刚才注册的账号登录。
 

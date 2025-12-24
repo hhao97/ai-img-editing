@@ -68,7 +68,7 @@ SUPABASE_SERVICE_ROLE_KEY=请填写你的 Supabase Service Role Key
 BETTER_AUTH_SECRET=FSv02zwVBEIv3IhoWQ34/3/ph2mZUnueS2bugtEfi+A=
 
 # 应用基础 URL
-BETTER_AUTH_BASE_URL=http://localhost:3000
+BETTER_AUTH_BASE_URL=https://ai-img.zeabur.app/
 
 # 允许的认证方式（仅使用邮箱密码）
 BETTER_AUTH_PROVIDERS=email
@@ -106,15 +106,15 @@ pnpm install
 pnpm dev
 
 # 4. 访问应用
-# http://localhost:3000
+# https://ai-img.zeabur.app/
 ```
 
 ## 测试认证流程
 
-1. 访问 http://localhost:3000/register
+1. 访问 https://ai-img.zeabur.app//register
 2. 填写邮箱、密码进行注册
 3. 注册成功后自动登录并跳转到首页
-4. 访问 http://localhost:3000/login 测试登录
+4. 访问 https://ai-img.zeabur.app//login 测试登录
 
 ## API 端点
 
