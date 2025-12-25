@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 export default function Login() {
@@ -18,17 +18,16 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const result = await authClient.signIn.email({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        callbackURL: "/",
       });
 
-      if (result.error) {
+      if (error) {
         toast.error("登录失败", {
-          description: result.error.message || "邮箱或密码错误",
+          description: error.message || "邮箱或密码错误",
         });
-      } else {
+      } else if (data.user) {
         toast.success("登录成功", {
           description: "正在跳转...",
         });

@@ -5,30 +5,25 @@ import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 
-// 分类映射
-const CATEGORIES = {
-  all: "全部",
-  fashion: "服装",
-  shoes: "鞋类",
-  accessories: "配饰",
-  home: "家居",
-  electronics: "数码",
-  beauty: "美妆",
-  food: "食品",
-  other: "其他",
-} as const;
-
-type Category = keyof typeof CATEGORIES;
-
 export default function Inspirations() {
   const [, navigate] = useLocation();
-  const [selectedCategory, setSelectedCategory] = useState<Category>("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  const { data: inspirations, isLoading } = trpc.inspirations.getAll.useQuery({
-    category: selectedCategory === "all" ? undefined : selectedCategory,
-  });
+  // 获取分类列表
+  const { data: categories, isLoading: isLoadingCategories } =
+    trpc.inspirations.getCategories.useQuery();
 
-  const handleUseInspiration = (inspiration: { prompt: string; note?: string | null; title: string }) => {
+  // 获取灵感列表
+  const { data: inspirations, isLoading: isLoadingInspirations } =
+    trpc.inspirations.getAll.useQuery({
+      category: selectedCategory === "all" ? undefined : selectedCategory,
+    });
+
+  const handleUseInspiration = (inspiration: {
+    prompt: string;
+    note?: string | null;
+    title: string;
+  }) => {
     // 将灵感信息存储到 sessionStorage，首页读取后使用
     sessionStorage.setItem("selected_inspiration_prompt", inspiration.prompt);
     if (inspiration.note) {
@@ -37,6 +32,8 @@ export default function Inspirations() {
     sessionStorage.setItem("selected_inspiration_title", inspiration.title);
     navigate("/");
   };
+
+  const isLoading = isLoadingCategories || isLoadingInspirations;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -62,17 +59,30 @@ export default function Inspirations() {
       <div className="sticky top-[73px] z-10 bg-background border-b border-border overflow-x-auto">
         <div className="container px-4 sm:px-6">
           <div className="flex gap-2 py-3 min-w-max">
-            {Object.entries(CATEGORIES).map(([key, label]) => (
+            {/* 全部分类 */}
+            <button
+              onClick={() => setSelectedCategory("all")}
+              className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-colors ${
+                selectedCategory === "all"
+                  ? "bg-primary text-white"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              全部
+            </button>
+
+            {/* 动态分类 */}
+            {categories?.map(category => (
               <button
-                key={key}
-                onClick={() => setSelectedCategory(key as Category)}
+                key={category.key}
+                onClick={() => setSelectedCategory(category.key)}
                 className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-colors ${
-                  selectedCategory === key
+                  selectedCategory === category.key
                     ? "bg-primary text-white"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
-                {label}
+                {category.label}
               </button>
             ))}
           </div>
@@ -80,21 +90,21 @@ export default function Inspirations() {
       </div>
 
       {/* Content */}
-      <div className="container px-4 sm:px-6 py-6">
+      <div className="container px-4 sm:px-6 py-4">
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : inspirations && inspirations.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {inspirations.map((inspiration) => (
+          <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-3">
+            {inspirations.map(inspiration => (
               <Card
                 key={inspiration.id}
-                className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow"
+                className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow break-inside-avoid mb-3"
                 onClick={() => handleUseInspiration(inspiration)}
               >
                 {/* Image */}
-                <div className="relative aspect-square overflow-hidden bg-muted">
+                <div className="relative aspect-[4/5] overflow-hidden bg-muted">
                   <img
                     src={inspiration.imageUrl}
                     alt={inspiration.title}
@@ -102,31 +112,31 @@ export default function Inspirations() {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform">
+                  <div className="absolute bottom-0 left-0 right-0 p-2 text-white transform translate-y-full group-hover:translate-y-0 transition-transform">
                     <Button
                       size="sm"
-                      className="w-full bg-white text-black hover:bg-white/90"
+                      className="w-full bg-white text-black hover:bg-white/90 text-xs h-7"
                     >
-                      <Sparkles className="w-4 h-4 mr-2" />
+                      <Sparkles className="w-3 h-3 mr-1" />
                       使用此模板
                     </Button>
                   </div>
                 </div>
 
                 {/* Info */}
-                <div className="p-4">
-                  <h3 className="font-semibold text-foreground mb-2 line-clamp-1">
+                <div className="p-2.5">
+                  <h3 className="font-medium text-sm text-foreground mb-1 line-clamp-1">
                     {inspiration.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-xs text-muted-foreground line-clamp-2">
                     {inspiration.prompt}
                   </p>
                   {inspiration.tags && inspiration.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-3">
-                      {inspiration.tags.slice(0, 3).map((tag, index) => (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {inspiration.tags.slice(0, 2).map((tag, index) => (
                         <span
                           key={index}
-                          className="px-2 py-0.5 bg-muted text-xs text-muted-foreground rounded"
+                          className="px-1.5 py-0.5 bg-muted text-[10px] text-muted-foreground rounded"
                         >
                           {tag}
                         </span>

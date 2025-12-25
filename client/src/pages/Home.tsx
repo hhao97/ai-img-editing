@@ -17,14 +17,6 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
-const CATEGORIES = [
-  { id: "hot", label: "热门", icon: "🔥" },
-  { id: "product", label: "产品宣传", icon: "📦" },
-  { id: "multi", label: "多图融合", icon: "🎨" },
-  { id: "bg", label: "换背景", icon: "🎭" },
-  { id: "remove", label: "消除/变", icon: "✨" },
-];
-
 const ASPECT_RATIOS = [
   { id: "original", label: "原始尺寸" },
   { id: "1:1", label: "1:1" },
@@ -56,8 +48,21 @@ export default function Home() {
   const generateMutation = trpc.images.generate.useMutation();
   const editMutation = trpc.images.edit.useMutation();
 
-  // 获取灵感列表（限制8个）
-  const { data: inspirations } = trpc.inspirations.getAll.useQuery();
+  // 获取灵感分类列表
+  const { data: inspirationCategories } =
+    trpc.inspirations.getCategories.useQuery();
+
+  // 灵感分类筛选状态
+  const [selectedInspirationCategory, setSelectedInspirationCategory] =
+    useState<string>("all");
+
+  // 获取灵感列表（根据分类筛选，限制8个）
+  const { data: inspirations } = trpc.inspirations.getAll.useQuery({
+    category:
+      selectedInspirationCategory === "all"
+        ? undefined
+        : selectedInspirationCategory,
+  });
   const displayedInspirations = inspirations?.slice(0, 8) || [];
   const [note, setNote] = useState<string>("");
 
@@ -354,26 +359,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Categories */}
-        <div className="mb-8">
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full border-2 transition-all whitespace-nowrap ${
-                  selectedCategory === cat.id
-                    ? "border-primary bg-primary/20 text-primary"
-                    : "border-border text-foreground hover:border-primary/50"
-                }`}
-              >
-                <span className="mr-2">{cat.icon}</span>
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Inspirations Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -390,6 +375,33 @@ export default function Home() {
               查看更多
               <ChevronRight className="w-4 h-4" />
             </Button>
+          </div>
+
+          {/* 分类选择器 */}
+          <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
+            <button
+              onClick={() => setSelectedInspirationCategory("all")}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                selectedInspirationCategory === "all"
+                  ? "bg-primary text-white"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              全部
+            </button>
+            {inspirationCategories?.map(category => (
+              <button
+                key={category.key}
+                onClick={() => setSelectedInspirationCategory(category.key)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                  selectedInspirationCategory === category.key
+                    ? "bg-primary text-white"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                {category.label}
+              </button>
+            ))}
           </div>
 
           {/* 横向滚动容器 */}
@@ -475,10 +487,15 @@ export default function Home() {
         {/* Input Section */}
         <div className="mb-8 space-y-4">
           {/* API Key Input */}
-          <div>
-            <label className="block text-sm font-medium mb-2">使用提示：</label>
-            <p className="text-xs text-muted-foreground mt-2">{note}</p>
-          </div>
+
+          {note && (
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                使用提示：
+              </label>
+              <p className="text-xs text-muted-foreground mt-2">{note}</p>
+            </div>
+          )}
 
           {/* Prompt Input */}
           <div>
@@ -497,14 +514,14 @@ export default function Home() {
 
         {/* Action Buttons */}
         <div className="flex gap-3">
-          <Button
+          {/*<Button
             variant="outline"
             className="flex-1 gap-2 border-border"
             onClick={() => setPrompt("")}
             disabled={isGenerating}
           >
             <span>优化提示词</span>
-          </Button>
+          </Button>*/}
           <Button
             className="flex-1 gap-2 bg-primary hover:bg-primary/90"
             onClick={handleGenerateClick}
@@ -518,17 +535,17 @@ export default function Home() {
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                <span>生成商品图</span>
+                <span>提交</span>
               </>
             )}
           </Button>
         </div>
 
         {/* Footer Info */}
-        <div className="mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
+        {/*<div className="mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
           <p>由 OpenRouter AI 提供支持</p>
           <p className="mt-1">使用 Google Gemini 2.5 Flash 模型</p>
-        </div>
+        </div>*/}
       </div>
     </div>
   );

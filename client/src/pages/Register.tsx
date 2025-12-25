@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 export default function Register() {
@@ -35,22 +35,26 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const result = await authClient.signUp.email({
-        name,
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        callbackURL: "/",
+        options: {
+          data: {
+            name,
+          },
+        },
       });
 
-      if (result.error) {
+      if (error) {
         toast.error("注册失败", {
-          description: result.error.message || "请稍后重试",
+          description: error.message || "请稍后重试",
         });
-      } else {
+      } else if (data.user) {
         toast.success("注册成功", {
-          description: "正在跳转...",
+          description: "请检查您的邮箱以验证账户",
         });
-        setLocation("/");
+        // Supabase 默认需要邮箱验证，可以在 Supabase 控制台配置
+        setLocation("/login");
       }
     } catch (error) {
       console.error("Register error:", error);

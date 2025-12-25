@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
+import { INSPIRATION_CATEGORY_LIST } from "@shared/inspirations";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
@@ -128,6 +129,11 @@ export const appRouter = router({
   }),
 
   inspirations: router({
+    getCategories: publicProcedure
+      .query(() => {
+        return INSPIRATION_CATEGORY_LIST;
+      }),
+
     getAll: publicProcedure
       .input(
         z.object({

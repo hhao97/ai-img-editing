@@ -1,7 +1,6 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import type { User } from "../../drizzle/schema";
-import { auth } from "../auth";
-import { getUserById } from "../db";
+import type { User } from "@supabase/supabase-js";
+import { supabaseAdmin } from "../supabase";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -15,16 +14,17 @@ export async function createContext(
   let user: User | null = null;
 
   try {
-    // 使用 BetterAuth 验证请求
-    const session = await auth.api.getSession({
-      headers: opts.req.headers,
-    });
+    // 从请求头中获取 Authorization token
+    const authHeader = opts.req.headers.authorization;
 
-    if (session?.user?.id) {
-      // 从数据库获取完整的用户信息
-      const dbUser = await getUserById(session.user.id);
-      if (dbUser) {
-        user = dbUser;
+    if (authHeader && authHeader.startsWith('Bearer ') && supabaseAdmin) {
+      const token = authHeader.substring(7);
+
+      // 验证 JWT token
+      const { data, error } = await supabaseAdmin.auth.getUser(token);
+
+      if (!error && data.user) {
+        user = data.user;
       }
     }
   } catch (error) {
